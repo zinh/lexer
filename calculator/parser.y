@@ -4,21 +4,19 @@
 %nonassoc UMINUS
 
 %%
-statement: NAME '=' expression
-         | expression { printf("= %d\n", $1); }
+statement: NAME '=' expr
+         | expr { printf("= %d\n", $1); }
          ;
-expression: expression '+' NUMBER { $$ = $1 + $3; }
-          | expression '-' NUMBER { $$ = $1 - $3; }
-          | expression '*' NUMBER { $$ = $1 * $3; }
-          | expression '/' NUMBER
-          { 
-          if ($3 == 0)
-            yyerror("Division by zero");
-          else
-            $$ = $1 / $3; 
-          }
-          | '-' expression %prec UMINUS { $$ = -$2; }
-          | '(' expression ')' { $$ = $2; }
-          | NUMBER { $$ = $1; }
-          ;
+expr: expr '+' mulexp { $$ = $1 + $3; }
+    | expr '-' mulexp { $$ = $1 - $3; }
+    | mulexp
+    ;
+mulexp: mulexp '*' primary { $$ = $1 * $3; }
+      | mulexp '/' primary { $$ = $1 / $3; }
+      | primary
+      ;
+primary: '(' expr ')' { $$ = $2; }
+       | '-' primary { $$ = -$2; }
+       | NUMBER
+       ;
 %%
